@@ -28,3 +28,8 @@ O sistema oferece as seguintes opções através do menu de console:
 | 4 | Relatório de Status | Lista todos os veículos que não estão "Disponíveis" (ou seja, estão "Alugado" ou "Manutenção"). |
 
 ---
+Os dados são salvos e carregados automaticamente nos seguintes arquivos:
+
+clientes.csv: Armazena clientes e seus pontos de fidelidade.
+veiculos.csv: Armazena veículos, suas diárias e status atual (Disponível, Alugado, Manutenção).
+reservas.csv: Armazena o histórico e o status das reservas.
