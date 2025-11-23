@@ -36,7 +36,7 @@ public class Locadora {
      */
 
     public boolean cadastrarVeiculo(Veiculo veiculo) {
-        // Validação (Tratamento de Erros)
+        
         if (veiculo == null || veiculo.getPlaca() == null || veiculo.getPlaca().isEmpty()) {
             System.err.println("Erro: Dados do veículo inválidos.");
             return false;
@@ -78,7 +78,7 @@ public class Locadora {
         for (Veiculo v : veiculos) {
             if (v.getPlaca().equals(placa)) {
                 v.setStatusManutencao(novoStatus);
-                // salvarVeiculos();
+        
                 System.out.println("Status de manutenção de " + placa + " atualizado para " + novoStatus);
                 return;
             }
@@ -320,8 +320,8 @@ public class Locadora {
                 String[] dados = linha.split(";");
                 if (dados.length >= 4) {
                     try {
-                        String cpf = limparCPF(dados[0].trim());   // CPF é o primeiro
-                        String nome = dados[1].trim();             // Nome é o segundo
+                        String cpf = limparCPF(dados[0].trim());   
+                        String nome = dados[1].trim();            
                         String tipo = dados[2].trim();
                         int pontos = Integer.parseInt(dados[3].trim());
 
