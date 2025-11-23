@@ -7,12 +7,14 @@ Este projeto simula um sistema de gerenciamento de locadora de veículos, implem
 Para rodar este projeto, você precisa ter:
 
 1.  **JDK (Java Development Kit)**: Versão 8 ou superior instalada.
+2.  **IDE INSTALADA**:Preferencialmente Intellij 
 
  Como Executar
 
-1.  Abrir o Projeto: Abra a pasta raiz `alugelCarros` na sua IDE.
-2.  Configurar os Dados: Certifique-se de que os arquivos de dados iniciais (`clientes.csv`, `veiculos.csv`, `reservas.csv`) estão localizados na raiz do projeto (junto à pasta `src`).
-3.  Executar: Compile e execute a classe **`Main.java`**.
+1.   Clone o repositório em sua maquina: git clone [link do repositório]
+2.    Abrir o Projeto: Abra a pasta raiz `alugelCarros` na sua IDE.
+3.  Configurar os Dados: Certifique-se de que os arquivos de dados iniciais (`clientes.csv`, `veiculos.csv`, `reservas.csv`) estão localizados na raiz do projeto (junto à pasta `src`).
+4.  Executar: Compile e execute a classe **`Main.java`**.
 
 ---
 
