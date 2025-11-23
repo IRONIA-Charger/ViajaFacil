@@ -34,7 +34,6 @@ public class Main {
                         locadora.gerarRelatorioVeiculosEmUso();
                         break;
                     case 5:
-                        // Opcional: Mostrar pontos do cliente (para teste)
                         consultarPontos(locadora, scanner);
                         break;
                     case 0:
