@@ -33,25 +33,23 @@ public class Locadora {
      * Cadastra um novo veículo na lista.
      *
      * @param veiculo O objeto Veiculo a ser cadastrado.
-     * @return true se o cadastro foi realizado com sucesso.
      */
 
-    public boolean cadastrarVeiculo(Veiculo veiculo) {
+    public void cadastrarVeiculo(Veiculo veiculo) {
         
         if (veiculo == null || veiculo.getPlaca() == null || veiculo.getPlaca().isEmpty()) {
             System.err.println("Erro: Dados do veículo inválidos.");
-            return false;
+            return;
         }
 
         if (veiculos.stream().anyMatch(v -> v.getPlaca().equals(veiculo.getPlaca()))) {
             System.err.println("Erro: Veículo com esta placa já cadastrado.");
-            return false;
+            return;
         }
 
         veiculos.add(veiculo);
         System.out.println("Veículo " + veiculo.getPlaca() + " cadastrado com sucesso.");
         salvarVeiculo();
-        return true;
     }
 
     /**
@@ -59,16 +57,15 @@ public class Locadora {
      *
      * @param cliente O objeto Cliente a ser cadastrado.
      */
-    public boolean cadastrarCliente(Cliente cliente) {
+    public void cadastrarCliente(Cliente cliente) {
         if (clientes.stream().anyMatch(c -> c.getCpf().equals(cliente.getCpf()))) {
             System.err.println("Erro: Cliente com este CPF já cadastrado.");
-            return false; // Retorna FALSO em caso de erro.
+            return;
         }
 
         clientes.add(cliente);
         System.out.println("Cliente " + cliente.getNome() + " cadastrado com sucesso.");
         salvarClientes();
-        return true;
     }
 
     public boolean validarDatasReserva(LocalDate retirada, LocalDate devolucao) {
@@ -221,20 +218,20 @@ public class Locadora {
         }
     }
 
-    public boolean fazerReserva(String cpf, String placa, LocalDate retirada, LocalDate devolucao){
+    public void fazerReserva(String cpf, String placa, LocalDate retirada, LocalDate devolucao){
 
         if (!validarDatasReserva(retirada, devolucao)) {
-            return false;
+            return;
         }
 
         if (cpf == null || cpf.trim().isEmpty()){
                 System.out.println("Erro: CPF não pode ser vazio.");
-                return false;
+                return;
         }
 
         if (placa == null || placa.trim().isEmpty()) {
             System.out.println("Erro: Placa não pode ser vazia.");
-            return false;
+            return;
         }
 
         cpf = limparCPF(cpf);
@@ -242,26 +239,26 @@ public class Locadora {
 
         if (cpf.length() != 11){
             System.out.println("CPF deve conter os 11 digítos");
-            return false;
+            return;
         }
         if (!placa.matches("[A-Z]{3}[0-9][A-Z0-9][0-9]{2}")) {
             System.out.println("Erro: Formato de placa inválido.");
-            return false;
+            return;
         }
 
         if (retirada == null || devolucao == null){
             System.out.println("ERRO: As datas não podem ser vazias");
-            return false;
+            return;
         }
 
         if (devolucao.isBefore(retirada) || devolucao.isEqual(retirada)){
             System.out.println("Erro: A data de devolução deve ser posterior a data de retirada");
-            return false;
+            return;
         }
 
         if (retirada.isBefore(LocalDate.now())) {
             System.out.println("Erro: Data de retirada não pode ser no passado.");
-            return false;
+            return;
         }
 
         Cliente cliente = buscarClientePorCPF(cpf);
@@ -269,33 +266,33 @@ public class Locadora {
 
         if (cliente == null) {
             System.out.println("Erro! Cliente com CPF " + cpf + " não encontrado");
-            return false;
+            return;
         }
         if (veiculo == null){
             System.out.println("Erro: Veículo com PLACA " + placa + " não encontrado");
-            return false;
+            return;
         }
 
         if (!veiculo.getStatusManutencao().equals("Disponível")) {
             System.out.println("Erro! " + placa + " não está disponível para alugel. (Status: " + veiculo.getStatusManutencao() + " ).");
-            return false;
+            return;
         }
 
         if (!isVeiculoLivreNoPeriodo(veiculo, retirada, devolucao)){
             System.out.println("Erro! O veículo " + placa + " já está reservado ou em manutenção/alugado no período solicitado.");
-            return false;
+            return;
         }
 
         if (veiculo.getCategoria().equals("Luxo") && cliente.getTipo().equals("Regular")) {
             System.out.println("Erro! Carros da Categoria Luxo são exclusivos para Clientes VIP");
-            return false;
+            return;
         }
 
         long dias = ChronoUnit.DAYS.between(retirada, devolucao);
 
         if (dias <= 0) {
             System.out.println("Erro. A data de devolução deve ser inferior a de retirada");
-            return false;
+            return;
         }
 
         double valorEstimadoBruto = veiculo.calcularValorAlugel((int) dias);
@@ -325,20 +322,19 @@ public class Locadora {
 
         System.out.println("SUCESSO: Reserva " + novoID + " confirmada. Valor estimado: R$ " + String.format("%.2f", valorEstimadoBruto));
 
-        return true;
     }
 
-    public boolean devolverVeiculo(String idReserva, LocalDate dataDevolucaoReal) {
+    public void devolverVeiculo(String idReserva, LocalDate dataDevolucaoReal) {
         Reserva reserva = buscarReservaPorID(idReserva);
 
         if (reserva == null) {
             System.out.println("Erro: Reserva com ID " + idReserva + " não existe");
-            return false;
+            return;
         }
 
         if (!reserva.getStatus().equals("Confirmado")) {
             System.out.println("Erro: Reserva já está com o status " + reserva.getStatus());
-            return false;
+            return;
         }
 
         LocalDate dataPrevista = reserva.getDataPrevistaDevolucao();
@@ -374,7 +370,7 @@ public class Locadora {
         salvarClientes();
 
         System.out.println("SUCESSO: Devolução concluida e veículo liberado");
-        return true;
+
     }
 
     public void adicionarPontosFidelidade(Cliente cliente, double valorGasto) {
@@ -593,4 +589,3 @@ public class Locadora {
         return placa.replaceAll("[^a-zA-Z0-9]", "").trim().toUpperCase();
     }
 }
-

@@ -91,7 +91,7 @@ public class Main {
         String tipo = scanner.nextLine();
 
         Cliente cliente = new Cliente(nome, cpf, tipo);
-        boolean sucesso = locadora.cadastrarCliente(cliente);
+        locadora.cadastrarCliente(cliente);
     }
 
     private static void cadastrarVeiculo(Locadora locadora, Scanner scanner) {
@@ -129,7 +129,7 @@ public class Main {
             }
             veiculo.setStatusManutencao(statusManutencao);
 
-            boolean sucesso = locadora.cadastrarVeiculo(veiculo);
+            locadora.cadastrarVeiculo(veiculo);
         } catch (InputMismatchException e) {
             IO.println("ERRO: O número da diária deve ser um número valido. Cadastro cancelado");
             scanner.nextLine();
@@ -170,7 +170,7 @@ public class Main {
             IO.println("ERRO DE ENTRADA: Formato de data inválido. Use AAAA-MM-DD.");
             return;
         }
-        boolean sucesso = locadora.fazerReserva(cpf, placa, retirada, devolucao);
+        locadora.fazerReserva(cpf, placa, retirada, devolucao);
 
     }
 
@@ -184,7 +184,7 @@ public class Main {
         IO.println("Data de Devolução Real: (AAAA-MM-DD)");
         LocalDate dataDevolucao = LocalDate.parse(scanner.nextLine());
 
-        boolean sucesso = locadora.devolverVeiculo(idReserva, dataDevolucao);
+       locadora.devolverVeiculo(idReserva, dataDevolucao);
     }
 
     private static void consultarPontos(Locadora locadora, Scanner scanner) {
