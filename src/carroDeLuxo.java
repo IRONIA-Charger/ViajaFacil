@@ -1,6 +1,6 @@
 public class carroDeLuxo extends Veiculo{
-    public carroDeLuxo(String modelo, String placa, String categoria, String statusManutencao, double valorDadiaria){
-        super(modelo, placa, "Luxo", "Disponível", valorDadiaria);
+    public carroDeLuxo(String modelo, String placa,String statusManutencao, double valorDaDiaria){
+        super(modelo, placa, "Luxo", statusManutencao, valorDaDiaria);
     }
     @Override
     public double calcularValorAlugel(int dias){

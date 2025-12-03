@@ -1,5 +1,6 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
@@ -11,9 +12,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Locadora {
-    private List<Veiculo> veiculos;
-    private List<Cliente> clientes;
-    private List<Reserva> reservas;
+    private final List<Veiculo> veiculos;
+    private final List<Cliente> clientes;
+    private final List<Reserva> reservas;
 
     public Locadora() {
         this.veiculos = new ArrayList<>();
@@ -49,6 +50,7 @@ public class Locadora {
 
         veiculos.add(veiculo);
         System.out.println("Veículo " + veiculo.getPlaca() + " cadastrado com sucesso.");
+        salvarVeiculo();
         return true;
     }
 
@@ -60,13 +62,80 @@ public class Locadora {
     public boolean cadastrarCliente(Cliente cliente) {
         if (clientes.stream().anyMatch(c -> c.getCpf().equals(cliente.getCpf()))) {
             System.err.println("Erro: Cliente com este CPF já cadastrado.");
-            return false;
+            return false; // Retorna FALSO em caso de erro.
         }
 
         clientes.add(cliente);
         System.out.println("Cliente " + cliente.getNome() + " cadastrado com sucesso.");
+        salvarClientes();
         return true;
     }
+
+    public boolean validarDatasReserva(LocalDate retirada, LocalDate devolucao) {
+        if (retirada == null || devolucao == null) {
+            System.out.println("Erro: Datas não podem ser nulas.");
+            return false;
+        }
+
+        if (retirada.isBefore(LocalDate.now())) {
+            System.out.println("Erro: Data de retirada não pode ser no passado.");
+            return false;
+        }
+
+        if (devolucao.isBefore(retirada)) {
+            System.out.println("Erro: Data de devolução anterior à retirada.");
+            return false;
+        }
+
+        if (devolucao.isEqual(retirada)) {
+            System.out.println("Erro: Período mínimo é de 1 dia.");
+            return false;
+        }
+
+        // Valida período máximo (ex: 30 dias)
+        long dias = ChronoUnit.DAYS.between(retirada, devolucao);
+        if (dias > 30) {
+            System.out.println("Erro: Período máximo de locação é 30 dias.");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     *Verifica se um veículo está disponível para reserva num determinado período.
+     * @param veiculo O veículo a ser verificado
+     * @param retirada Data de início do período desejado
+     * @param devolucao Data de fim do período solicitado
+     * @return true se o veículo estiver livre no período, false caso contrário
+     */
+    public boolean isVeiculoLivreNoPeriodo(Veiculo  veiculo, LocalDate retirada, LocalDate devolucao){
+        if (!veiculo.getStatusManutencao().equalsIgnoreCase("Disponivel")){
+            return false;
+        }
+
+        for (Reserva r : reservas){
+            if (!r.getStatus().equalsIgnoreCase("Confirmado")){
+                continue;
+            }
+            if (r.getVeiculo().getPlaca().equalsIgnoreCase(veiculo.getPlaca())){
+                LocalDate inicioReserva = r.getDataRetirada();
+                LocalDate fimReserva = r.getDataPrevistaDevolucao();
+
+                boolean conflito =
+                        (retirada.isBefore(fimReserva) && devolucao.isAfter(inicioReserva)) ||
+                                (retirada.isEqual(inicioReserva) || devolucao.isEqual(fimReserva));
+
+                if (conflito){
+                    System.out.println("Conflito encontrado com reserva " + r.getIdReserva() + " no período " +inicioReserva
+                           + " a " + fimReserva);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
     /**
      * Altera o status de manutenção de um veículo (Requisito de Manutenção).
@@ -88,32 +157,29 @@ public class Locadora {
 
     public Cliente buscarClientePorCPF(String cpfBusca) {
         String cpfLimpo = limparCPF(cpfBusca);
-        for (Cliente c : clientes) {
-            if (limparCPF(c.getCpf()).equals(cpfLimpo)) {
-                return c;
-            }
-        }
-        return null;
+
+        return clientes.stream()
+                .filter(c -> limparCPF(c.getCpf()).equals(cpfLimpo))
+                .findFirst()
+                .orElse(null);
     }
+
     public Veiculo buscarCarroPorPlaca(String placaBusca) {
         String placaLimpa = limparPlaca(placaBusca);
-        for (Veiculo v : veiculos) {
-            if (limparPlaca(v.getPlaca()).equalsIgnoreCase(placaLimpa)) {
-                return v;
-            }
-        }
-        return null;
+
+        return veiculos.stream()
+                .filter(v -> limparPlaca(v.getPlaca()).equalsIgnoreCase(placaLimpa))
+                .findFirst()
+                .orElse(null);
     }
 
     public Reserva buscarReservaPorID(String id) {
         String idBusca = id.trim();
 
-        for (Reserva r : reservas) {
-            if (r.getIdReserva().trim().equals(idBusca)) {
-                return r;
-            }
-        }
-        return null;
+        return reservas.stream()
+                .filter(r -> r.getIdReserva().trim().equals(idBusca))
+                .findFirst()
+                .orElse(null);
     }
 
     public void salvarVeiculo() {
@@ -157,16 +223,66 @@ public class Locadora {
 
     public boolean fazerReserva(String cpf, String placa, LocalDate retirada, LocalDate devolucao){
 
+        if (!validarDatasReserva(retirada, devolucao)) {
+            return false;
+        }
+
+        if (cpf == null || cpf.trim().isEmpty()){
+                System.out.println("Erro: CPF não pode ser vazio.");
+                return false;
+        }
+
+        if (placa == null || placa.trim().isEmpty()) {
+            System.out.println("Erro: Placa não pode ser vazia.");
+            return false;
+        }
+
+        cpf = limparCPF(cpf);
+        placa = limparPlaca(placa);
+
+        if (cpf.length() != 11){
+            System.out.println("CPF deve conter os 11 digítos");
+            return false;
+        }
+        if (!placa.matches("[A-Z]{3}[0-9][A-Z0-9][0-9]{2}")) {
+            System.out.println("Erro: Formato de placa inválido.");
+            return false;
+        }
+
+        if (retirada == null || devolucao == null){
+            System.out.println("ERRO: As datas não podem ser vazias");
+            return false;
+        }
+
+        if (devolucao.isBefore(retirada) || devolucao.isEqual(retirada)){
+            System.out.println("Erro: A data de devolução deve ser posterior a data de retirada");
+            return false;
+        }
+
+        if (retirada.isBefore(LocalDate.now())) {
+            System.out.println("Erro: Data de retirada não pode ser no passado.");
+            return false;
+        }
+
         Cliente cliente = buscarClientePorCPF(cpf);
         Veiculo veiculo = buscarCarroPorPlaca(placa);
 
-        if (cliente == null || veiculo == null) {
-            System.out.println("Erro! Cliente ou Veículo não encontrado");
+        if (cliente == null) {
+            System.out.println("Erro! Cliente com CPF " + cpf + " não encontrado");
+            return false;
+        }
+        if (veiculo == null){
+            System.out.println("Erro: Veículo com PLACA " + placa + " não encontrado");
             return false;
         }
 
         if (!veiculo.getStatusManutencao().equals("Disponível")) {
             System.out.println("Erro! " + placa + " não está disponível para alugel. (Status: " + veiculo.getStatusManutencao() + " ).");
+            return false;
+        }
+
+        if (!isVeiculoLivreNoPeriodo(veiculo, retirada, devolucao)){
+            System.out.println("Erro! O veículo " + placa + " já está reservado ou em manutenção/alugado no período solicitado.");
             return false;
         }
 
@@ -178,7 +294,7 @@ public class Locadora {
         long dias = ChronoUnit.DAYS.between(retirada, devolucao);
 
         if (dias <= 0) {
-            System.out.println("Erro. A data de deolução deve ser inferior a de retirada");
+            System.out.println("Erro. A data de devolução deve ser inferior a de retirada");
             return false;
         }
 
@@ -245,7 +361,7 @@ public class Locadora {
         System.out.println("Valor Final a Pagar: R$ " + String.format("%.2f", valorTotalFinal));
 
         reserva.setValorPago(valorTotalFinal);
-        reserva.setStatus("Concluído");
+        reserva.setStatus("Concluido");
 
         Veiculo veiculo = reserva.getVeiculo();
         veiculo.setStatusManutencao("Disponível");
@@ -281,7 +397,7 @@ public class Locadora {
         System.out.println("\n==RELATÓRIO DE RECEITAS TOTAIS==");
 
         for (Reserva r : reservas){
-            if (r.getStatus().equalsIgnoreCase("Concluído")){
+            if (r.getStatus().equalsIgnoreCase("Concluido")){
                 totalReceita += r.getValorPago();
 
                 System.out.printf("ID %s | Cliente: %s | Veículo: %s | Valor Final: R$ %.2f%n",
@@ -294,7 +410,7 @@ public class Locadora {
             }
         }
         System.out.println("------------------------------------------");
-        System.out.println("==TOTAL ACUMULADO RECEITAS: R$ .%.2f%n" + totalReceita);
+        System.out.printf("==TOTAL ACUMULADO RECEITAS: R$ %.2f%n",totalReceita);
     }
 
     private String normalizeLine(String linha) {
@@ -363,21 +479,20 @@ public class Locadora {
                         String statusManutencao = dados[3].trim();
                         double diaria = Double.parseDouble(dados[4].trim());
 
-                        Veiculo veiculo = null;
+                        Veiculo veiculo;
 
                         if (categoria.equalsIgnoreCase("Luxo")) {
-                            veiculo = new carroDeLuxo(modelo, placa, categoria, statusManutencao, diaria);
+                            veiculo = new carroDeLuxo(modelo, placa,statusManutencao, diaria);
                         }
                         else if (categoria.equalsIgnoreCase("Economico") || categoria.equalsIgnoreCase("Econômico")) {
-                            veiculo = new carroEconomico(modelo, placa, categoria, statusManutencao, diaria);
+                            veiculo = new carroEconomico(modelo, placa,statusManutencao, diaria);
+                        }
+                        else if (categoria.equalsIgnoreCase("SUV")){
+                            veiculo = new SUV(modelo,placa,statusManutencao,diaria);
                         }
                         else {
-                            veiculo = new Veiculo(modelo, placa, categoria, statusManutencao, diaria) {
-                                @Override
-                                public double calcularValorAlugel(int dias) {
-                                    return this.valorDaDiaria * dias;
-                                }
-                            };
+                            System.out.println("ERRO: Categoria desconhecida ("+ categoria + ") para a placa:"  + placa + ". Linha ignorada");
+                            continue;
                         }
 
                         this.veiculos.add(veiculo);
@@ -398,13 +513,11 @@ public class Locadora {
         }
     }
 
-
-
     public void carregarReservas() {
         int contagemReservas = 0;
 
         try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(new FileInputStream(ARQUIVO_RESERVAS), "UTF-8"))) {
+                new InputStreamReader(new FileInputStream(ARQUIVO_RESERVAS), StandardCharsets.UTF_8))) {
 
             String linha;
             while ((linha = br.readLine()) != null) {
@@ -450,7 +563,6 @@ public class Locadora {
         }
     }
 
-
     public void gerarRelatorioVeiculosEmUso(){
 
         System.out.println("== RELATÓRIO DE STATUS DE VEÍCULOS ==");
@@ -471,25 +583,6 @@ public class Locadora {
         System.out.println("------------------------------------------");
     }
 
-    public void gerarRelatorioReceitas(){
-        double totalReceita = 0;
-
-        System.out.println("== RELÁTORIO DE RECEITAS  TOTAIS ==");
-        System.out.println("-----------------------------------");
-
-        for (Reserva r : reservas){
-            if (r.getStatus().equalsIgnoreCase("Concluído")){
-                totalReceita += r.getValorPago();
-                System.out.printf("ID %s | Cliente: %s | Veículo: %s | Valor Final: R$ %.2f%n",
-                        r.getIdReserva(),
-                        r.getCliente().getNome(),
-                        r.getVeiculo().getPlaca(),
-                        r.getValorPago());
-            }
-        }
-        System.out.println("----------------------------------");
-        System.out.println("TOTAL ACUMULADO RECEITAS: R$: " + totalReceita);
-    }
     private String limparCPF(String cpf) {
         if (cpf == null) return "";
         return cpf.replaceAll("[^0-9]", "").trim();

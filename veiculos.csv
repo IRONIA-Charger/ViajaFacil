@@ -1,4 +1,15 @@
-ABC1234;Fiat Mobi;Econômico;Disponível;60.0;carroEconomico
-DEF5678;Audi A4;Luxo;Disponível;250.0;carroDeLuxo
-GHI9012;Chevrolet Onix;Econômico;Disponível;75.0;carroEconomico
-JKL3456;Jeep Renegade;SUV;Manutenção;150.0;carroSUV
+AAA1111;Gol;Economico;Disponivel;50.00;CarroEconomico
+BBB2222;Corsa;Economico;Manutencao;45.00;CarroEconomico
+CCC3333;Onix;Economico;Alugado;55.00;CarroEconomico
+DDD4444;BMW X1;Luxo;Disponivel;180.00;CarroDeLuxo
+EEE5555;Audi A4;Luxo;Manutencao;200.00;CarroDeLuxo
+FFF6666;Volvo XC40;SUV;Disponivel;120.00;SUV
+GGG7777;Compass;SUV;Alugado;135.00;SUV
+HHH8888;Sandero;Economico;Disponivel;40.00;CarroEconomico
+III9999;HR-V;SUV;Manutencao;110.00;SUV
+JJJ0000;Mercedes C;Luxo;Disponivel;250.00;CarroDeLuxo
+KKK1111;Palio;Economico;Alugado;35.00;CarroEconomico
+LLL2222;Fiat Argo;Economico;Disponivel;48.00;CarroEconomico
+MMM3333;Discovery;SUV;Disponivel;220.00;SUV
+NNN4444;Porsche;Luxo;Disponivel;350.00;CarroDeLuxo
+OOO5555;Kwid;Economico;Disponivel;30.00;CarroEconomico

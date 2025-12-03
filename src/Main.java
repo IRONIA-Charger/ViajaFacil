@@ -1,6 +1,8 @@
-import java.util.Scanner;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Scanner;
 import java.util.InputMismatchException;
+
 public class Main {
     public static void main(String[] args) {
         Locadora locadora = new Locadora();
@@ -16,7 +18,7 @@ public class Main {
         while (opcao != 0) {
             exibirMenu();
             try {
-                System.out.print("Escolha uma opção: ");
+                IO.print("Escolha uma opção: ");
                 opcao = scanner.nextInt();
                 scanner.nextLine();
 
@@ -28,83 +30,177 @@ public class Main {
                         devolverVeiculo(locadora, scanner);
                         break;
                     case 3:
-                        locadora.gerarRelatorioReceitas();
+                        cadastrarCliente(locadora, scanner);
                         break;
                     case 4:
-                        locadora.gerarRelatorioVeiculosEmUso();
+                        cadastrarVeiculo(locadora, scanner);
                         break;
                     case 5:
+                        atualizarStatusManutencao(locadora, scanner);
+                        break;
+                    case 6:
+                        locadora.gerarRelatorioReceita();
+                        break;
+                    case 7:
+                        locadora.gerarRelatorioVeiculosEmUso();
+                        break;
+                    case 8:
                         consultarPontos(locadora, scanner);
                         break;
                     case 0:
-                        System.out.println("Encerrando o sistema. Até mais!");
+                        IO.println("Encerrando o sistema. Até mais!");
                         break;
                     default:
-                        System.out.println("Opção inválida. Tente novamente.");
+                        IO.println("Opção inválida. Tente novamente.");
                 }
             } catch (InputMismatchException e) {
-                System.out.println("ERRO: Entrada inválida. Por favor, digite um número.");
+                IO.println("ERRO: Entrada inválida. Por favor, digite um número.");
                 scanner.nextLine();
                 opcao = -1;
             }
         }
         scanner.close();
     }
-        private static void exibirMenu(){
-            System.out.println("+===========---Funções---===========+");
-            System.out.println("| 1. Fazer Reserva                  |");
-            System.out.println("| 2. Devolver Veículo               |");
-            System.out.println("| 3. Relatório de Receitas          |");
-            System.out.println("| 4. Relatório de Status de Veículos|");
-            System.out.println("| 5. Consultar Pontos               |");
-            System.out.println("| 0. Sair                           |");
-            System.out.println("+-----------------------------------+");
-        }
 
-        private static void fazerReserva(Locadora locadora, Scanner scanner){
-            System.out.println("-------- NOVA RESERVA --------");
-
-            System.out.println("Digite o CPF do Cliente: ");
-            String cpf = scanner.nextLine();
-
-            System.out.println("Digite a Placa do Veículo: ");
-            String placa = scanner.nextLine();
-
-            System.out.println("Data Retirada: (AAAA/MM/DD)");
-            LocalDate retirada = LocalDate.parse(scanner.nextLine());
-
-            System.out.println("Data Prevista: (AAAA/MM/DD)");
-            LocalDate devolucao = LocalDate.parse(scanner.nextLine());
-
-            locadora.fazerReserva(cpf, placa, retirada, devolucao);
-
-        }
-        private static void devolverVeiculo(Locadora locadora, Scanner scanner){
-
-            System.out.println("----- DEVOLUÇÃO DE VEÍCULO -----");
-
-            System.out.println("Digite o ID da Reserva a ser desenvolvida: (Ex: RES1)");
-            String idReserva = scanner.nextLine().trim();
-
-            System.out.println("Data de Devolução Real: (AAAA/MM/DD)");
-            LocalDate dataDevolucao = LocalDate.parse(scanner.nextLine());
-
-            locadora.devolverVeiculo(idReserva, dataDevolucao);
-        }
-        private static void consultarPontos(Locadora locadora, Scanner scanner){
-            System.out.println("----- CONSULTA DE PONTOS -----");
-
-            System.out.println("Digite o CPF do cliente: ");
-            String cpf = scanner.nextLine();
+    private static void exibirMenu() {
+        IO.println("+===========---Funções---===========+");
+        IO.println("| 1. Fazer Reserva                  |");
+        IO.println("| 2. Devolver Veículo               |");
+        IO.println("| 3. Cadastrar um novo Cliente      |");
+        IO.println("| 4. Cadastrar um novo veículo      |");
+        IO.println("| 5. Atualizar status da manutenção |");
+        IO.println("| 6. Relatório de Receitas          |");
+        IO.println("| 7. Relatório de Status de Veículos|");
+        IO.println("| 8. Consultar Pontos               |");
+        IO.println("| 0. Sair                           |");
+        IO.println("+-----------------------------------+");
+    }
 
 
-            Cliente cliente = locadora.buscarClientePorCPF(cpf);
+    private static void cadastrarCliente(Locadora locadora, Scanner scanner) {
+        IO.println("--------CADASTRO DE CLIENTE---------");
 
-            if (cliente != null){
-                System.out.println("Cliente: " + cliente.getNome());
-                System.out.println("Pontos: " + cliente.getPontosFidelidade());
-            }else {
-                System.out.println("Cliente não encontrado");
+
+        IO.println("Digite o NOME do cliente: ");
+        String nome = scanner.nextLine();
+
+        IO.println("Digite o CPF do cliente: ");
+        String cpf = scanner.nextLine();
+
+        IO.println("Tipo de CLIENTE: ");
+        String tipo = scanner.nextLine();
+
+        Cliente cliente = new Cliente(nome, cpf, tipo);
+        boolean sucesso = locadora.cadastrarCliente(cliente);
+    }
+
+    private static void cadastrarVeiculo(Locadora locadora, Scanner scanner) {
+        IO.println("-------CADASTRO DE VEÍCULO-------");
+
+        IO.println("Digite o MODELO do veículo: ");
+        String modelo = scanner.nextLine();
+
+        IO.println("Digte a PLACA do veículo: ");
+        String placa = scanner.nextLine();
+
+        IO.println("CATEGORIA(LUXO, ECONÔMICO OU SUV): ");
+        String categoria = scanner.nextLine();
+
+        try {
+            IO.println("Valor da DIÁRIA: ");
+            double valorDaDiaria = scanner.nextDouble();
+
+            scanner.nextLine();
+
+            IO.println("Status (ALUGADO OU DISPONÍVEl): ");
+
+            String statusManutencao = scanner.nextLine();
+
+            Veiculo veiculo;
+            if (categoria.equalsIgnoreCase("Luxo")) {
+                veiculo = new carroDeLuxo(modelo, placa, statusManutencao, valorDaDiaria);
+            } else if (categoria.equalsIgnoreCase("Economico")) {
+                veiculo = new carroEconomico(modelo, placa, statusManutencao, valorDaDiaria);
+            } else if (categoria.equalsIgnoreCase("SUV")) {
+                veiculo = new SUV(modelo, placa, statusManutencao, valorDaDiaria);
+            } else {
+                IO.println("Categoria inválida, Cadastro cancelado");
+                return;
             }
+            veiculo.setStatusManutencao(statusManutencao);
+
+            boolean sucesso = locadora.cadastrarVeiculo(veiculo);
+        } catch (InputMismatchException e) {
+            IO.println("ERRO: O número da diária deve ser um número valido. Cadastro cancelado");
+            scanner.nextLine();
         }
     }
+
+    private static void atualizarStatusManutencao(Locadora locadora, Scanner scanner) {
+        IO.println("-------ATUALIZAR STATUS-------");
+
+        IO.println("Placa: ");
+        String placa = scanner.nextLine();
+
+        IO.println("Novo Status: ");
+        String novoStatus = scanner.nextLine();
+
+        locadora.atualizarStatusManutencao(placa, novoStatus);
+    }
+
+    private static void fazerReserva(Locadora locadora, Scanner scanner) {
+        IO.println("-------- NOVA RESERVA --------");
+
+        IO.println("Digite o CPF do Cliente: ");
+        String cpf = scanner.nextLine();
+
+        IO.println("Digite a Placa do Veículo: ");
+        String placa = scanner.nextLine();
+
+        LocalDate retirada;
+        LocalDate devolucao;
+
+        try {
+            IO.println("Data Retirada: (AAAA-MM-DD)");
+            retirada = LocalDate.parse(scanner.nextLine());
+
+            IO.println("Data Prevista: (AAAA-MM-DD)");
+            devolucao = LocalDate.parse(scanner.nextLine());
+        } catch (DateTimeParseException e) {
+            IO.println("ERRO DE ENTRADA: Formato de data inválido. Use AAAA-MM-DD.");
+            return;
+        }
+        boolean sucesso = locadora.fazerReserva(cpf, placa, retirada, devolucao);
+
+    }
+
+    private static void devolverVeiculo(Locadora locadora, Scanner scanner) {
+
+        IO.println("----- DEVOLUÇÃO DE VEÍCULO -----");
+
+        IO.println("Digite o ID da Reserva a ser desenvolvida: (Ex: RES1)");
+        String idReserva = scanner.nextLine().trim();
+
+        IO.println("Data de Devolução Real: (AAAA-MM-DD)");
+        LocalDate dataDevolucao = LocalDate.parse(scanner.nextLine());
+
+        boolean sucesso = locadora.devolverVeiculo(idReserva, dataDevolucao);
+    }
+
+    private static void consultarPontos(Locadora locadora, Scanner scanner) {
+        IO.println("----- CONSULTA DE PONTOS -----");
+
+        IO.println("Digite o CPF do cliente: ");
+        String cpf = scanner.nextLine();
+
+
+        Cliente cliente = locadora.buscarClientePorCPF(cpf);
+
+        if (cliente != null) {
+            IO.println("Cliente: " + cliente.getNome());
+            IO.println("Pontos: " + cliente.getPontosFidelidade());
+        } else {
+            IO.println("Cliente não encontrado");
+        }
+    }
+}

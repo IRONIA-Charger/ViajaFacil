@@ -61,6 +61,4 @@ public abstract class Veiculo {
                 this.getClass().getName()
         );
     }
-
-
 }

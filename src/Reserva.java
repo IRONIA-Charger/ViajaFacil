@@ -2,12 +2,12 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 public class Reserva implements Serializable{
-    private String idReserva;
-    private Cliente cliente;
-    private Veiculo veiculo;
-    private LocalDate dataRetirada;
-    private LocalDate dataPrevistaDevolucao;
-    private double valorEstimado;
+    private final String idReserva;
+    private final Cliente cliente;
+    private final Veiculo veiculo;
+    private final LocalDate dataRetirada;
+    private final LocalDate dataPrevistaDevolucao;
+    private final double valorEstimado;
     private double valorPago;
     private String status;
 
